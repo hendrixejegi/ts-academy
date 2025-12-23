@@ -41,11 +41,9 @@ const getSingleProduct = (req, res) => {
 
   const matchingProduct = products.find((product) => product.id === productId);
 
-  console.log(productId);
-
   if (!matchingProduct) {
     throw new CustomError({
-      statusCode: 400,
+      statusCode: 404,
       message: `No product with id: ${productId} was found`,
     });
   }
@@ -55,4 +53,41 @@ const getSingleProduct = (req, res) => {
     .json({ success: true, message: 'Product found', data: matchingProduct });
 };
 
-module.exports = { addProduct, getAllProducts, getSingleProduct };
+const deleteProduct = (req, res) => {
+  const { productId } = req.params;
+
+  if (!productId) {
+    throw new CustomError({
+      statusCode: 400,
+      message: 'Product ID must be provided',
+    });
+  }
+
+  const matchingProduct = products.find((product) => product.id === productId);
+
+  const matchingProductIndex = products.findIndex(
+    (product) => product.id === productId
+  );
+
+  if (matchingProductIndex === -1 && !matchingProduct) {
+    throw new CustomError({
+      statusCode: 404,
+      message: `Cannot delete non-existing product`,
+    });
+  }
+
+  products.splice(matchingProductIndex, 1);
+
+  res.status(204).json({
+    success: true,
+    message: 'Resource removed successfully',
+    data: matchingProduct,
+  });
+};
+
+module.exports = {
+  addProduct,
+  getAllProducts,
+  getSingleProduct,
+  deleteProduct,
+};
