@@ -18,7 +18,7 @@ const addProduct = (req, res) => {
 
   products.push(newProduct);
 
-  res.status(200).json({
+  res.status(201).json({
     success: true,
     message: 'Product added successfully',
     product: newProduct,
@@ -29,4 +29,30 @@ const getAllProducts = (req, res) => {
   res.status(200).json({ success: true, data: products });
 };
 
-module.exports = { addProduct, getAllProducts };
+const getSingleProduct = (req, res) => {
+  const { productId } = req.params;
+
+  if (!productId) {
+    throw new CustomError({
+      statusCode: 400,
+      message: 'Product ID must be provided',
+    });
+  }
+
+  const matchingProduct = products.find((product) => product.id === productId);
+
+  console.log(productId);
+
+  if (!matchingProduct) {
+    throw new CustomError({
+      statusCode: 400,
+      message: `No product with id: ${productId} was found`,
+    });
+  }
+
+  res
+    .status(200)
+    .json({ success: true, message: 'Product found', data: matchingProduct });
+};
+
+module.exports = { addProduct, getAllProducts, getSingleProduct };
