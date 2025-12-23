@@ -27,12 +27,12 @@ const addProduct = (req, res) => {
   res.status(201).json({
     success: true,
     message: 'Product added successfully',
-    product: newProduct,
+    data: newProduct,
   });
 };
 
 const getAllProducts = (req, res) => {
-  res.status(200).json({ success: true, data: products });
+  res.status(200).json({ success: true, products: products });
 };
 
 const getSingleProduct = (req, res) => {
