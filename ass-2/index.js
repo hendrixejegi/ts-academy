@@ -4,9 +4,7 @@ const errorHandler = require('./middlewares/error-handler');
 const port = 5000;
 const app = express();
 
-app.get('/', (req, res) => {
-  res.status(200).send('lets go baby');
-});
+app.use(express.json());
 
 const productRoute = require('./routes/product.route');
 
