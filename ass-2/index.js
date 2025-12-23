@@ -8,6 +8,10 @@ app.get('/', (req, res) => {
   res.status(200).send('lets go baby');
 });
 
+const productRoute = require('./routes/product.route');
+
+app.use('/api/product', productRoute);
+
 app.use(errorHandler);
 
 app.listen(port, () => {
