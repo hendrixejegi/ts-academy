@@ -8,7 +8,7 @@ const findProductIndex = (id) => {
   return products.findIndex((product) => product.id === id);
 };
 
-const validateRequestName = (req) => {
+const validateRequestBody = (req) => {
   let isValid = false;
 
   if (typeof req.body === 'object' && 'name' in req.body) {
@@ -20,7 +20,7 @@ const validateRequestName = (req) => {
   return isValid;
 };
 
-const validateRequestId = (req) => {
+const validateRequestParams = (req) => {
   let isValid = false;
 
   if (typeof req.params === 'object' && 'productId' in req.params) {
@@ -33,6 +33,6 @@ const validateRequestId = (req) => {
 module.exports = {
   findProduct,
   findProductIndex,
-  validateRequestId,
-  validateRequestName,
+  validateRequestParams,
+  validateRequestBody,
 };

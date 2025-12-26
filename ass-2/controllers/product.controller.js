@@ -3,12 +3,12 @@ const { CustomError } = require('../lib/error');
 const {
   findProduct,
   findProductIndex,
-  validateRequestId,
-  validateRequestName,
+  validateRequestParams,
+  validateRequestBody,
 } = require('../lib/utils');
 
 const addProduct = (req, res) => {
-  if (!validateRequestName(req)) {
+  if (!validateRequestBody(req)) {
     throw new CustomError({
       statusCode: 400,
       message: 'Enter a valid name with more than 3 characters',
@@ -36,7 +36,7 @@ const getAllProducts = (req, res) => {
 };
 
 const getSingleProduct = (req, res) => {
-  if (!validateRequestId(req)) {
+  if (!validateRequestParams(req)) {
     throw new CustomError({
       statusCode: 400,
       message: 'Product ID must be provided',
@@ -60,7 +60,7 @@ const getSingleProduct = (req, res) => {
 };
 
 const updateProduct = (req, res) => {
-  if (!validateRequestId(req) || !validateRequestName(req)) {
+  if (!validateRequestParams(req) || !validateRequestBody(req)) {
     throw new CustomError({
       statusCode: 400,
       message: 'Must provide product ID and new name',
@@ -92,7 +92,7 @@ const updateProduct = (req, res) => {
 };
 
 const deleteProduct = (req, res) => {
-  if (!validateRequestId(req)) {
+  if (!validateRequestParams(req)) {
     throw new CustomError({
       statusCode: 400,
       message: 'Product ID must be provided',
