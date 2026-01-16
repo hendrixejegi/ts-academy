@@ -1,4 +1,4 @@
-require('dotenv').config();
+const config = require('./config');
 const express = require('express');
 const errorHandler = require('./middlewares/error-handler');
 const productRoute = require('./routes/product.route');
@@ -15,8 +15,8 @@ app.use(errorHandler);
 const startServer = async () => {
   await connectDB();
 
-  app.listen(process.env.PORT, () => {
-    console.log(`Server is listening on port ${process.env.PORT}...`);
+  app.listen(config.port, () => {
+    console.log(`Server is listening on port ${config.port}...`);
   });
 };
 

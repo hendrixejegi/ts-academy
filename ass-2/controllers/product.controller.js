@@ -1,36 +1,20 @@
-const products = require('../db/products');
 const { CustomError } = require('../lib/error');
-const {
-  findProduct,
-  findProductIndex,
-  validateRequestParams,
-  validateRequestBody,
-} = require('../lib/utils');
+const { zodParse, sendSuccess } = require('../lib/utils');
+const Product = require('../db/models/product.model');
 
-const addProduct = (req, res) => {
-  if (!validateRequestBody(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Enter a valid name with more than 3 characters',
-    });
-  }
+const addProduct = async (req, res) => {
+  const allowed = zodParse(Product.InputSchema, req.body);
 
-  const { name } = req.body;
+  const product = new Product.Model(allowed);
+  await product.save();
 
-  const newProduct = {
-    id: crypto.randomUUID(),
-    name,
-  };
-
-  products.push(newProduct);
-
-  res.status(201).json({
-    success: true,
+  sendSuccess(res, 201, {
     message: 'Product added successfully',
-    data: newProduct,
+    data: product,
   });
 };
 
+/*
 const getAllProducts = (req, res) => {
   res.status(200).json({ success: true, products: products });
 };
@@ -60,12 +44,8 @@ const getSingleProduct = (req, res) => {
 };
 
 const updateProduct = (req, res) => {
-  if (!validateRequestParams(req) || !validateRequestBody(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Must provide product ID and new name',
-    });
-  }
+  checkValidateRequestResult(validateRequestParams(req), 'Must provide id');
+  checkValidateRequestResult(validateRequestBody(req), 'Must provide name');
 
   const { productId } = req.params;
   const { name } = req.body;
@@ -92,12 +72,7 @@ const updateProduct = (req, res) => {
 };
 
 const deleteProduct = (req, res) => {
-  if (!validateRequestParams(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Product ID must be provided',
-    });
-  }
+  checkValidateRequestResult(validateRequestParams(req), 'Must provide id');
 
   const { productId } = req.params;
 
@@ -126,12 +101,15 @@ const handleWrongMethod = (req, res) => {
     message: `${req.method} method not allowed`,
   });
 };
+*/
 
 module.exports = {
   addProduct,
+  /*
   getAllProducts,
   getSingleProduct,
   updateProduct,
   deleteProduct,
   handleWrongMethod,
+  */
 };

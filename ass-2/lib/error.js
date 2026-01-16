@@ -1,9 +1,13 @@
 class CustomError extends Error {
-  constructor({ statusCode, message }) {
+  /**
+   *
+   * @param number status
+   * @param {{message: string, code: string, details: unknown}} detail
+   */
+  constructor(status, detail) {
     super();
-    this.success = false;
-    this.statusCode = statusCode;
-    this.message = message;
+    this.status = status;
+    this.detail = detail;
   }
 }
 
