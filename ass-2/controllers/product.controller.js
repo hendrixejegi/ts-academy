@@ -1,5 +1,5 @@
 const { CustomError } = require('../lib/error');
-const { zodParse, sendSuccess } = require('../lib/utils');
+const { zodParse, sendSuccess, sendError } = require('../lib/utils');
 const Product = require('../db/models/product.model');
 
 const addProduct = async (req, res) => {
@@ -14,102 +14,77 @@ const addProduct = async (req, res) => {
   });
 };
 
-/*
-const getAllProducts = (req, res) => {
-  res.status(200).json({ success: true, products: products });
+const getProducts = async (req, res) => {
+  const products = await Product.Model.find({});
+
+  const meta = {
+    total: products.length,
+  };
+
+  sendSuccess(res, 200, { data: products, meta });
 };
 
-const getSingleProduct = (req, res) => {
-  if (!validateRequestParams(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Product ID must be provided',
+const getProductByID = async (req, res) => {
+  const allowed = zodParse(Product.FindProductByIDSchema, req.params);
+
+  const product = await Product.Model.findById({ _id: allowed.productId });
+
+  if (!product) {
+    return sendError(res, 404, { message: 'Product not found' });
+  }
+
+  sendSuccess(res, 200, { data: product });
+};
+
+const updateProductByID = async (req, res) => {
+  const allowedParams = zodParse(Product.FindProductByIDSchema, req.params);
+  const allowedBody = zodParse(Product.UpdateSchema, req.body);
+
+  if (Object.keys(allowedBody).length === 0) {
+    return sendError(res, 400, {
+      message: 'No value provided',
+      code: 'bad_request',
     });
   }
 
-  const { productId } = req.params;
+  const options = {
+    new: true,
+  };
 
-  const matchingProduct = findProduct(productId);
+  const product = await Product.Model.findByIdAndUpdate(
+    {
+      _id: allowedParams.productId,
+    },
+    allowedBody,
+    options
+  );
 
-  if (!matchingProduct) {
-    throw new CustomError({
-      statusCode: 404,
-      message: `No product with id: ${productId} was found`,
-    });
+  if (!product) {
+    return sendError(res, 404, { message: 'Product not found' });
   }
 
-  res
-    .status(200)
-    .json({ success: true, message: 'Product found', data: matchingProduct });
+  sendSuccess(res, 200, { data: product });
 };
 
-const updateProduct = (req, res) => {
-  checkValidateRequestResult(validateRequestParams(req), 'Must provide id');
-  checkValidateRequestResult(validateRequestBody(req), 'Must provide name');
+const deleteProductByID = async (req, res) => {
+  const allowed = zodParse(Product.FindProductByIDSchema, req.params);
 
-  const { productId } = req.params;
-  const { name } = req.body;
+  const product = await Product.Model.findByIdAndDelete(
+    { _id: allowed.productId },
+    { includesResultMetadata: false }
+  );
 
-  const matchingProduct = findProduct(productId);
-  const matchingProductIndex = findProductIndex(productId);
-
-  if (matchingProductIndex === -1 && !matchingProduct) {
-    throw new CustomError({
-      statusCode: 404,
-      message: `Cannot delete non-existing product`,
-    });
+  if (!product) {
+    return sendError(res, 404, { message: 'Product not found' });
   }
 
-  const updatedProduct = { ...matchingProduct, name };
-
-  products[matchingProductIndex] = updatedProduct;
-
-  res.status(200).json({
-    success: true,
-    message: 'Product updated successfully',
-    data: updatedProduct,
-  });
+  sendSuccess(res, 204, { data: product });
 };
-
-const deleteProduct = (req, res) => {
-  checkValidateRequestResult(validateRequestParams(req), 'Must provide id');
-
-  const { productId } = req.params;
-
-  const matchingProduct = findProduct(productId);
-  const matchingProductIndex = findProductIndex(productId);
-
-  if (matchingProductIndex === -1 && !matchingProduct) {
-    throw new CustomError({
-      statusCode: 404,
-      message: `Cannot delete non-existing product`,
-    });
-  }
-
-  products.splice(matchingProductIndex, 1);
-
-  res.status(204).json({
-    success: true,
-    message: 'Resource removed successfully',
-    data: matchingProduct,
-  });
-};
-
-const handleWrongMethod = (req, res) => {
-  throw new CustomError({
-    statusCode: 405,
-    message: `${req.method} method not allowed`,
-  });
-};
-*/
 
 module.exports = {
   addProduct,
-  /*
-  getAllProducts,
-  getSingleProduct,
-  updateProduct,
-  deleteProduct,
-  handleWrongMethod,
-  */
+  getProducts,
+  getProductByID,
+  updateProductByID,
+  deleteProductByID,
 };

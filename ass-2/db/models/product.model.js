@@ -3,11 +3,6 @@ const z = require('zod');
 
 const { Schema } = mongoose;
 
-const InputSchema = z.strictObject({
-  name: z.string(),
-  onSale: z.boolean().optional(),
-});
-
 const productSchema = new Schema(
   {
     name: {
@@ -27,4 +22,15 @@ const productSchema = new Schema(
 
 const Model = mongoose.model('Product', productSchema);
 
-module.exports = { Model, InputSchema };
+const InputSchema = z.strictObject({
+  name: z.string(),
+  onSale: z.boolean().optional(),
+});
+
+const UpdateSchema = InputSchema.partial();
+
+const FindProductByIDSchema = z.strictObject({
+  productId: z.string(),
+});
+
+module.exports = { Model, InputSchema, UpdateSchema, FindProductByIDSchema };

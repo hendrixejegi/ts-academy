@@ -28,12 +28,19 @@ const zodParse = (Schema, inputData) => {
  *
  * @param {Express.Response} res
  * @param {number} status
- * @param {{message: string, data: unknown}} args
+ * @param {{message: string, data: unknown, meta: {page: number, pageSize: number, total: number}}} args
  */
 const sendSuccess = (res, status, args) => {
   const successSchema = z.strictObject({
     message: z.string().optional(),
-    data: z.looseObject().optional(),
+    data: z.union([z.array(z.any()), z.looseObject()]).optional(),
+    meta: z
+      .strictObject({
+        page: z.number().optional(),
+        pageSize: z.number().optional(),
+        total: z.number().optional(),
+      })
+      .optional(),
   });
 
   try {

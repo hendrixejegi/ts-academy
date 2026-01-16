@@ -1,4 +1,4 @@
-const { config } = require('dotenv');
+const config = require('../config');
 const { CustomError, getErrorMessage } = require('../lib/error');
 const { sendError } = require('../lib/utils');
 

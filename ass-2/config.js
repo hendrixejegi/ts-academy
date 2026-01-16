@@ -5,4 +5,6 @@ const config = {
   env: process.env.NODE_ENV,
 };
 
+console.log('Environment:', config.env);
+
 module.exports = config;
