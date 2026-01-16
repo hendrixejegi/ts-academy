@@ -1,25 +1,20 @@
 const express = require('express');
 const {
   addProduct,
-  getAllProducts,
-  getSingleProduct,
-  updateProduct,
-  deleteProduct,
-  handleWrongMethod,
+  getProducts,
+  getProductByID,
+  updateProductByID,
+  deleteProductByID,
 } = require('../controllers/product.controller');
 
 const router = express.Router();
 
-router
-  .route('/')
-  .post(addProduct)
-  .get(getAllProducts)
-  .delete(handleWrongMethod);
+router.route('/').post(addProduct).get(getProducts);
 
 router
   .route('/:productId')
-  .get(getSingleProduct)
-  .patch(updateProduct)
-  .delete(deleteProduct);
+  .get(getProductByID)
+  .patch(updateProductByID)
+  .delete(deleteProductByID);
 
 module.exports = router;

@@ -1,137 +1,90 @@
-const products = require('../db/products');
 const { CustomError } = require('../lib/error');
-const {
-  findProduct,
-  findProductIndex,
-  validateRequestId,
-  validateRequestName,
-} = require('../lib/utils');
+const { zodParse, sendSuccess, sendError } = require('../lib/utils');
+const Product = require('../db/models/product.model');
 
-const addProduct = (req, res) => {
-  if (!validateRequestName(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Enter a valid name with more than 3 characters',
-    });
-  }
+const addProduct = async (req, res) => {
+  const allowed = zodParse(Product.InputSchema, req.body);
 
-  const { name } = req.body;
+  const product = new Product.Model(allowed);
+  await product.save();
 
-  const newProduct = {
-    id: crypto.randomUUID(),
-    name,
+  sendSuccess(res, 201, {
+    message: 'Product added successfully',
+    data: product,
+  });
+};
+
+const getProducts = async (req, res) => {
+  const products = await Product.Model.find({});
+
+  const meta = {
+    total: products.length,
   };
 
-  products.push(newProduct);
-
-  res.status(201).json({
-    success: true,
-    message: 'Product added successfully',
-    data: newProduct,
-  });
+  sendSuccess(res, 200, { data: products, meta });
 };
 
-const getAllProducts = (req, res) => {
-  res.status(200).json({ success: true, products: products });
+const getProductByID = async (req, res) => {
+  const allowed = zodParse(Product.FindProductByIDSchema, req.params);
+
+  const product = await Product.Model.findById({ _id: allowed.productId });
+
+  if (!product) {
+    return sendError(res, 404, { message: 'Product not found' });
+  }
+
+  sendSuccess(res, 200, { data: product });
 };
 
-const getSingleProduct = (req, res) => {
-  if (!validateRequestId(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Product ID must be provided',
+const updateProductByID = async (req, res) => {
+  const allowedParams = zodParse(Product.FindProductByIDSchema, req.params);
+  const allowedBody = zodParse(Product.UpdateSchema, req.body);
+
+  if (Object.keys(allowedBody).length === 0) {
+    return sendError(res, 400, {
+      message: 'No value provided',
+      code: 'bad_request',
     });
   }
 
-  const { productId } = req.params;
+  const options = {
+    new: true,
+  };
 
-  const matchingProduct = findProduct(productId);
+  const product = await Product.Model.findByIdAndUpdate(
+    {
+      _id: allowedParams.productId,
+    },
+    allowedBody,
+    options
+  );
 
-  if (!matchingProduct) {
-    throw new CustomError({
-      statusCode: 404,
-      message: `No product with id: ${productId} was found`,
-    });
+  if (!product) {
+    return sendError(res, 404, { message: 'Product not found' });
   }
 
-  res
-    .status(200)
-    .json({ success: true, message: 'Product found', data: matchingProduct });
+  sendSuccess(res, 200, { data: product });
 };
 
-const updateProduct = (req, res) => {
-  if (!validateRequestId(req) || !validateRequestName(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Must provide product ID and new name',
-    });
+const deleteProductByID = async (req, res) => {
+  const allowed = zodParse(Product.FindProductByIDSchema, req.params);
+
+  const product = await Product.Model.findByIdAndDelete(
+    { _id: allowed.productId },
+    { includesResultMetadata: false }
+  );
+
+  if (!product) {
+    return sendError(res, 404, { message: 'Product not found' });
   }
 
-  const { productId } = req.params;
-  const { name } = req.body;
-
-  const matchingProduct = findProduct(productId);
-  const matchingProductIndex = findProductIndex(productId);
-
-  if (matchingProductIndex === -1 && !matchingProduct) {
-    throw new CustomError({
-      statusCode: 404,
-      message: `Cannot delete non-existing product`,
-    });
-  }
-
-  const updatedProduct = { ...matchingProduct, name };
-
-  products[matchingProductIndex] = updatedProduct;
-
-  res.status(200).json({
-    success: true,
-    message: 'Product updated successfully',
-    data: updatedProduct,
-  });
-};
-
-const deleteProduct = (req, res) => {
-  if (!validateRequestId(req)) {
-    throw new CustomError({
-      statusCode: 400,
-      message: 'Product ID must be provided',
-    });
-  }
-
-  const { productId } = req.params;
-
-  const matchingProduct = findProduct(productId);
-  const matchingProductIndex = findProductIndex(productId);
-
-  if (matchingProductIndex === -1 && !matchingProduct) {
-    throw new CustomError({
-      statusCode: 404,
-      message: `Cannot delete non-existing product`,
-    });
-  }
-
-  products.splice(matchingProductIndex, 1);
-
-  res.status(204).json({
-    success: true,
-    message: 'Resource removed successfully',
-    data: matchingProduct,
-  });
-};
-
-const handleWrongMethod = (req, res) => {
-  throw new CustomError({
-    statusCode: 405,
-    message: `${req.method} method not allowed`,
-  });
+  sendSuccess(res, 204, { data: product });
 };
 
 module.exports = {
   addProduct,
-  getAllProducts,
-  getSingleProduct,
-  updateProduct,
-  deleteProduct,
-  handleWrongMethod,
+  getProducts,
+  getProductByID,
+  updateProductByID,
+  deleteProductByID,
 };

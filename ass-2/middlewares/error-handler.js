@@ -1,20 +1,21 @@
+const config = require('../config');
 const { CustomError, getErrorMessage } = require('../lib/error');
+const { sendError } = require('../lib/utils');
 
 const errorHandler = (err, req, res, next) => {
   if (res.headerSent) {
     next(err);
   }
 
-  if (err instanceof CustomError) {
-    return res
-      .status(err.statusCode)
-      .json({ success: err.success, message: err.message });
+  if (config.env === 'development') {
+    console.log(err);
   }
 
-  res.status(500).json({
-    success: false,
-    message: getErrorMessage(err) || 'Internal Server Error',
-  });
+  if (err instanceof CustomError) {
+    return sendError(res, err.status, err.detail);
+  }
+
+  sendError(res, 500, { message: 'Internal server error' });
 };
 
 module.exports = errorHandler;
