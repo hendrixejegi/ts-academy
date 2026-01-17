@@ -17,11 +17,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    role: {
-      type: Schema.Types.Union,
-      of: ['admin', 'user'],
+    admin: {
+      type: Boolean,
       required: true,
-      default: 'user',
+      default: false,
     },
   },
   { timestamps: true, strict: true }
@@ -32,7 +31,7 @@ const Model = mongoose.model('User', userSchema);
 const InputSchema = z.strictObject({
   name: z.string(),
   email: z.email(),
-  role: z.enum(['admin', 'user']),
+  admin: z.boolean().optional(),
   password: z.string().min(8).max(15),
 });
 
