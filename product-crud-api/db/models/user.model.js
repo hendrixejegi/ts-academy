@@ -28,11 +28,18 @@ const userSchema = new Schema(
 
 const Model = mongoose.model('User', userSchema);
 
-const InputSchema = z.strictObject({
+const BasePassword = z.string();
+
+const SignUpSchema = z.object({
   name: z.string(),
   email: z.email(),
   admin: z.boolean().optional(),
-  password: z.string().min(8).max(15),
+  password: BasePassword.min(8).max(15),
 });
 
-module.exports = { Model, InputSchema };
+const SignInSchema = z.object({
+  email: z.email(),
+  password: BasePassword,
+});
+
+module.exports = { Model, SignUpSchema, SignInSchema };
