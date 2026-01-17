@@ -28,7 +28,6 @@ const createSession = async (res, userId) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
     sameSite: 'strict',
     expires,
   };
@@ -41,4 +40,9 @@ const createSession = async (res, userId) => {
   return token;
 };
 
-module.exports = { createSession };
+const deleteSession = async (res, userId) => {
+  await Session.Model.deleteMany({ userId });
+  res.clearCookie('product_api_token');
+};
+
+module.exports = { createSession, deleteSession, decrypt };

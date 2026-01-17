@@ -1,6 +1,6 @@
 const User = require('../db/models/user.model');
-const { createSession } = require('../lib/session');
-const { zodParse, sendSuccess } = require('../lib/utils');
+const { createSession, deleteSession, decrypt } = require('../lib/session');
+const { zodParse, sendSuccess, sendError } = require('../lib/utils');
 const bcrypt = require('bcryptjs');
 
 const signUpWithEmail = async (req, res) => {
@@ -10,7 +10,7 @@ const signUpWithEmail = async (req, res) => {
   const hash = await bcrypt.hash(allowed.password, 10);
 
   const user = new User.Model({ ...allowed, password: hash });
-  // await user.save();
+  await user.save();
 
   const token = await createSession(res, user.id);
 
@@ -18,8 +18,23 @@ const signUpWithEmail = async (req, res) => {
   sendSuccess(res, 201, { data: { token, rest } });
 };
 
-const signInWithEmail = async (req, res) => {};
+// const signInWithEmail = async (req, res) => {
+//   const allowed
+// };
 
-const signOut = async (req, res) => {};
+const signOut = async (req, res) => {
+  const token = req.cookies.product_api_token;
+
+  if (!token) {
+    return sendError(res, 403, {
+      message: 'Unauthorized',
+      code: 'unauthorized',
+    });
+  }
+
+  const { userId } = await decrypt(token);
+  await deleteSession(res, userId);
+  sendSuccess(res, 200, {});
+};
 
 module.exports = { signUpWithEmail, signInWithEmail, signOut };
