@@ -1,5 +1,10 @@
 const User = require('../db/models/user.model');
-const { createSession, deleteSession, decrypt } = require('../lib/session');
+const {
+  createSession,
+  deleteSession,
+  decrypt,
+  getSession,
+} = require('../lib/session');
 const { zodParse, sendSuccess, sendError } = require('../lib/utils');
 const bcrypt = require('bcryptjs');
 
@@ -43,16 +48,7 @@ const signInWithEmail = async (req, res) => {
 };
 
 const signOut = async (req, res) => {
-  const token = req.cookies.product_api_token;
-
-  if (!token) {
-    return sendError(res, 403, {
-      message: 'Unauthorized',
-      code: 'unauthorized',
-    });
-  }
-
-  const { userId } = await decrypt(token);
+  const { userId } = await getSession(req.cookies);
   await deleteSession(res, userId);
   sendSuccess(res, 200, {});
 };

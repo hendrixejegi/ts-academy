@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Session = require('../db/models/session.model');
+const { CustomError } = require('./error');
 
 const TOKEN_TTL = '1h';
 
@@ -40,9 +41,21 @@ const createSession = async (res, userId) => {
   return token;
 };
 
+const getSession = async (cookies) => {
+  const token = cookies.product_api_token;
+
+  if (!token) {
+    throw new CustomError(403, {
+      message: 'Unauthorized',
+      code: 'unauthorized',
+    });
+  }
+  return decrypt(token);
+};
+
 const deleteSession = async (res, userId) => {
   await Session.Model.deleteMany({ userId });
   res.clearCookie('product_api_token');
 };
 
-module.exports = { createSession, deleteSession, decrypt };
+module.exports = { createSession, getSession, deleteSession, decrypt };
