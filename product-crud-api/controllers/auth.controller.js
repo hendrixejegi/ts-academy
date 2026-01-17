@@ -1,10 +1,5 @@
 const User = require('../db/models/user.model');
-const {
-  createSession,
-  deleteSession,
-  decrypt,
-  getSession,
-} = require('../lib/session');
+const { createSession, deleteSession } = require('../lib/session');
 const { zodParse, sendSuccess, sendError } = require('../lib/utils');
 const bcrypt = require('bcryptjs');
 
@@ -13,7 +8,6 @@ const signUpWithEmail = async (req, res) => {
 
   // hash password before store
   const hash = await bcrypt.hash(allowed.password, 10);
-
   const user = new User.Model({ ...allowed, password: hash });
   await user.save();
 
@@ -38,9 +32,8 @@ const signInWithEmail = async (req, res) => {
   })();
 
   if (!isMatch) {
-    sendError(res, 400, { message: 'Incorrect email or password.' });
+    return sendError(res, 400, { message: 'Incorrect email or password.' });
   }
-
   const token = await createSession(res, user.id);
 
   const { password: hash, ...rest } = user._doc;
@@ -48,7 +41,7 @@ const signInWithEmail = async (req, res) => {
 };
 
 const signOut = async (req, res) => {
-  const { userId } = await getSession(req.cookies);
+  const { userId } = req;
   await deleteSession(res, userId);
   sendSuccess(res, 200, {});
 };
