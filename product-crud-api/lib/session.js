@@ -45,7 +45,7 @@ const getSession = async (cookies) => {
   const token = cookies.product_api_token;
 
   if (!token) {
-    throw new CustomError(403, {
+    throw new CustomError(401, {
       message: 'Unauthorized',
       code: 'unauthorized',
     });

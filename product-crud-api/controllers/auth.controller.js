@@ -1,6 +1,7 @@
 const User = require('../db/models/user.model');
+const { CustomError } = require('../lib/error');
 const { createSession, deleteSession } = require('../lib/session');
-const { zodParse, sendSuccess, sendError } = require('../lib/utils');
+const { zodParse, sendSuccess } = require('../lib/utils');
 const bcrypt = require('bcryptjs');
 
 const signUpWithEmail = async (req, res) => {
@@ -32,7 +33,10 @@ const signInWithEmail = async (req, res) => {
   })();
 
   if (!isMatch) {
-    return sendError(res, 400, { message: 'Incorrect email or password.' });
+    throw new CustomError(400, {
+      message: 'Incorrect email or password.',
+      code: 'bad_request',
+    });
   }
   const token = await createSession(res, user.id);
 
