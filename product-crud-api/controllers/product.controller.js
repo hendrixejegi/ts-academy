@@ -18,8 +18,6 @@ const addProduct = async (req, res) => {
 };
 
 const getProducts = async (req, res) => {
-  await checkPerm(req.userId, ACTIONS.CAN_READ);
-
   const products = await Product.Model.find({});
 
   const meta = {
@@ -30,8 +28,6 @@ const getProducts = async (req, res) => {
 };
 
 const getProductByID = async (req, res) => {
-  await checkPerm(req.userId, ACTIONS.CAN_READ);
-
   const allowed = zodParse(Product.FindProductByIDSchema, req.params);
 
   const product = await Product.Model.findById({ _id: allowed.productId });

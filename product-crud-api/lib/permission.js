@@ -3,7 +3,6 @@ const { CustomError } = require('./error');
 
 const ACTIONS = {
   CAN_WRITE: 'CAN_WRITE',
-  CAN_READ: 'CAN_READ',
   CAN_UPDATE: 'CAN_UPDATE',
   CAN_DELETE: 'CAN_DELETE',
 };
