@@ -7,6 +7,14 @@ const bcrypt = require('bcryptjs');
 const signUpWithEmail = async (req, res) => {
   const allowed = zodParse(User.SignUpSchema, req.body);
 
+  const existingUser = await User.Model.findOne({ email: allowed.email });
+  if (existingUser) {
+    throw new CustomError(400, {
+      code: 'bad_request',
+      message: 'User with email already exists.',
+    });
+  }
+
   // hash password before store
   const hash = await bcrypt.hash(allowed.password, 10);
   const user = new User.Model({ ...allowed, password: hash });
@@ -28,7 +36,6 @@ const signInWithEmail = async (req, res) => {
     if (!user) {
       return false;
     }
-
     return bcrypt.compare(password, user.password);
   })();
 
