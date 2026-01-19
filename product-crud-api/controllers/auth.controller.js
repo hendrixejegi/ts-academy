@@ -20,7 +20,7 @@ const signUpWithEmail = async (req, res) => {
   const user = new User.Model({ ...allowed, password: hash });
   await user.save();
 
-  const token = await createSession(res, user.id);
+  const token = await createSession(res, user);
 
   const { password, ...rest } = user._doc;
   sendSuccess(res, 201, { data: { token, rest } });
@@ -45,7 +45,8 @@ const signInWithEmail = async (req, res) => {
       code: 'bad_request',
     });
   }
-  const token = await createSession(res, user.id);
+
+  const token = await createSession(res, user);
 
   const { password: hash, ...rest } = user._doc;
   sendSuccess(res, 200, { data: { token, rest } });

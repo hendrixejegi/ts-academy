@@ -24,7 +24,7 @@ const encrypt = async (payload) =>
 
 const decrypt = async (token) => jwt.verify(token, process.env.JWT_SECRET);
 
-const createSession = async (res, userId) => {
+const createSession = async (res, user) => {
   const expires = ttlToDate(TOKEN_TTL);
 
   const options = {
@@ -33,9 +33,13 @@ const createSession = async (res, userId) => {
     expires,
   };
 
-  const token = await encrypt({ userId });
+  const payload = {
+    id: user.id,
+    admin: user.admin,
+  };
+  const token = await encrypt(payload);
 
-  await Session.Model.create({ userId, token, expires });
+  await Session.Model.create({ userId: payload.id, token, expires });
 
   res.cookie('product_api_token', token, options);
   return token;

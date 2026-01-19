@@ -4,7 +4,7 @@ const Product = require('../db/models/product.model');
 const { checkPerm, ACTIONS } = require('../lib/permission');
 
 const addProduct = async (req, res) => {
-  await checkPerm(req.userId, ACTIONS.CAN_WRITE);
+  await checkPerm(req.user.admin, ACTIONS.CAN_WRITE);
 
   const allowed = zodParse(Product.InputSchema, req.body);
 
@@ -43,7 +43,7 @@ const getProductByID = async (req, res) => {
 };
 
 const updateProductByID = async (req, res) => {
-  await checkPerm(req.userId, ACTIONS.CAN_UPDATE);
+  await checkPerm(req.user.admin, ACTIONS.CAN_UPDATE);
 
   const allowedParams = zodParse(Product.FindProductByIDSchema, req.params);
   const allowedBody = zodParse(Product.UpdateSchema, req.body);
@@ -64,7 +64,7 @@ const updateProductByID = async (req, res) => {
       _id: allowedParams.productId,
     },
     allowedBody,
-    options
+    options,
   );
 
   if (!product) {
@@ -78,13 +78,13 @@ const updateProductByID = async (req, res) => {
 };
 
 const deleteProductByID = async (req, res) => {
-  await checkPerm(req.userId, ACTIONS.CAN_DELETE);
+  await checkPerm(req.user.admin, ACTIONS.CAN_DELETE);
 
   const allowed = zodParse(Product.FindProductByIDSchema, req.params);
 
   const product = await Product.Model.findByIdAndDelete(
     { _id: allowed.productId },
-    { includesResultMetadata: false }
+    { includesResultMetadata: false },
   );
 
   if (!product) {

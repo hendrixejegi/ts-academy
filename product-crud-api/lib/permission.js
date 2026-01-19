@@ -8,15 +8,11 @@ const ACTIONS = {
 };
 
 const userActions = Object.values(ACTIONS).filter(
-  (action) => action !== ACTIONS.CAN_DELETE
+  (action) => action !== ACTIONS.CAN_DELETE,
 );
 const adminActions = Object.values(ACTIONS);
 
-const checkPerm = async (userId, action) => {
-  const user = await User.Model.findById({ _id: userId });
-
-  const isAdmin = user.admin;
-
+const checkPerm = async (isAdmin, action) => {
   if (
     (!isAdmin && userActions.includes(action)) ||
     (isAdmin && adminActions.includes(action))
