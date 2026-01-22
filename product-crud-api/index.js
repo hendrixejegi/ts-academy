@@ -2,13 +2,17 @@ const config = require('./config');
 const express = require('express');
 const errorHandler = require('./middlewares/error-handler');
 const productRoute = require('./routes/product.route');
+const authRoute = require('./routes/auth.route');
 const connectDB = require('./db/connect-db');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
-app.use('/api/product', productRoute);
+app.use('/api/products', productRoute);
+app.use('/api/auth', authRoute);
 
 app.use(errorHandler);
 

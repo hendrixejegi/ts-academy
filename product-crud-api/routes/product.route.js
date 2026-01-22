@@ -6,15 +6,16 @@ const {
   updateProductByID,
   deleteProductByID,
 } = require('../controllers/product.controller');
+const checkAuth = require('../middlewares/check-auth');
 
 const router = express.Router();
 
-router.route('/').post(addProduct).get(getProducts);
+router.route('/').post([checkAuth, addProduct]).get(getProducts);
 
 router
   .route('/:productId')
   .get(getProductByID)
-  .patch(updateProductByID)
-  .delete(deleteProductByID);
+  .patch([checkAuth, updateProductByID])
+  .delete([checkAuth, deleteProductByID]);
 
 module.exports = router;

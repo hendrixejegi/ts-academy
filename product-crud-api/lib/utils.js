@@ -1,5 +1,4 @@
 const z = require('zod');
-const products = require('../db/products');
 const { CustomError } = require('./error');
 
 /**

@@ -1,8 +1,11 @@
 const { CustomError } = require('../lib/error');
-const { zodParse, sendSuccess, sendError } = require('../lib/utils');
+const { zodParse, sendSuccess } = require('../lib/utils');
 const Product = require('../db/models/product.model');
+const { checkPerm, ACTIONS } = require('../lib/permission');
 
 const addProduct = async (req, res) => {
+  await checkPerm(req.user.admin, ACTIONS.CAN_WRITE);
+
   const allowed = zodParse(Product.InputSchema, req.body);
 
   const product = new Product.Model(allowed);
@@ -30,18 +33,23 @@ const getProductByID = async (req, res) => {
   const product = await Product.Model.findById({ _id: allowed.productId });
 
   if (!product) {
-    return sendError(res, 404, { message: 'Product not found' });
+    throw new CustomError(404, {
+      message: 'Product not found',
+      code: 'not_found',
+    });
   }
 
   sendSuccess(res, 200, { data: product });
 };
 
 const updateProductByID = async (req, res) => {
+  await checkPerm(req.user.admin, ACTIONS.CAN_UPDATE);
+
   const allowedParams = zodParse(Product.FindProductByIDSchema, req.params);
   const allowedBody = zodParse(Product.UpdateSchema, req.body);
 
   if (Object.keys(allowedBody).length === 0) {
-    return sendError(res, 400, {
+    throw new CustomError(400, {
       message: 'No value provided',
       code: 'bad_request',
     });
@@ -56,26 +64,34 @@ const updateProductByID = async (req, res) => {
       _id: allowedParams.productId,
     },
     allowedBody,
-    options
+    options,
   );
 
   if (!product) {
-    return sendError(res, 404, { message: 'Product not found' });
+    throw new CustomError(404, {
+      message: 'Product not found',
+      code: 'not_found',
+    });
   }
 
   sendSuccess(res, 200, { data: product });
 };
 
 const deleteProductByID = async (req, res) => {
+  await checkPerm(req.user.admin, ACTIONS.CAN_DELETE);
+
   const allowed = zodParse(Product.FindProductByIDSchema, req.params);
 
   const product = await Product.Model.findByIdAndDelete(
     { _id: allowed.productId },
-    { includesResultMetadata: false }
+    { includesResultMetadata: false },
   );
 
   if (!product) {
-    return sendError(res, 404, { message: 'Product not found' });
+    throw new CustomError(404, {
+      message: 'Product not found',
+      code: 'not_found',
+    });
   }
 
   sendSuccess(res, 204, { data: product });
