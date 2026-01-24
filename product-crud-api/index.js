@@ -3,6 +3,7 @@ const express = require('express');
 const errorHandler = require('./middlewares/error-handler');
 const productRoute = require('./routes/product.route');
 const authRoute = require('./routes/auth.route');
+const todoRoute = require('./routes/todo.route');
 const connectDB = require('./db/connect-db');
 const cookieParser = require('cookie-parser');
 
@@ -13,6 +14,7 @@ app.use(cookieParser());
 
 app.use('/api/products', productRoute);
 app.use('/api/auth', authRoute);
+app.use('/api/todos', todoRoute);
 
 app.use(errorHandler);
 
