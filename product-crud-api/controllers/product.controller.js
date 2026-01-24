@@ -2,13 +2,20 @@ const { CustomError } = require('../lib/error');
 const { zodParse, sendSuccess } = require('../lib/utils');
 const Product = require('../db/models/product.model');
 const { checkPerm, ACTIONS } = require('../lib/permission');
+const { uploadImageToCloudinary } = require('../lib/cloudinary');
 
 const addProduct = async (req, res) => {
   await checkPerm(req.user.admin, ACTIONS.CAN_WRITE);
 
   const allowed = zodParse(Product.InputSchema, req.body);
 
-  const product = new Product.Model(allowed);
+  const imageUrl = await uploadImageToCloudinary(req.file);
+
+  const product = new Product.Model({
+    ...allowed,
+    imageUrl,
+    ...(allowed.onSale && { onSale: allowed.onSale === 'true' }),
+  });
   await product.save();
 
   sendSuccess(res, 201, {

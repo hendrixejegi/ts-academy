@@ -31,6 +31,7 @@ const createSession = async (res, user) => {
     httpOnly: true,
     sameSite: 'strict',
     expires,
+    secure: process.env.NODE_ENV === 'production',
   };
 
   const payload = {
